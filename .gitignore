@@ -13,6 +13,11 @@ target/
 .springBeans
 .sts4-cache
 
+# Package Files #
+*.jar
+*.war
+*.ear
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -31,3 +36,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# SSH Keys
+
+*.pem
+*.ppk
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Merge Files
+*.bak
