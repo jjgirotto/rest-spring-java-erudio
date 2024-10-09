@@ -29,7 +29,7 @@ public class PersonController {
 
     @PostMapping(consumes = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML},
                 produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
-    public PersonVO create(@RequestBody PersonVO person) {
+    public PersonVO create(@RequestBody PersonVO person) throws Exception {
         return personService.create(person);
     }
 
@@ -40,7 +40,7 @@ public class PersonController {
 
     @PutMapping(consumes = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML},
                 produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
-    public PersonVO update(@RequestBody PersonVO person) {
+    public PersonVO update(@RequestBody PersonVO person) throws Exception {
         return personService.create(person);
     }
 
