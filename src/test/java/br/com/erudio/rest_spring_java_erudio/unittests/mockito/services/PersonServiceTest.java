@@ -1,4 +1,4 @@
-package br.com.erudio.rest_spring_java_erudio.mockito.services;
+package br.com.erudio.rest_spring_java_erudio.unittests.mockito.services;
 
 import br.com.erudio.rest_spring_java_erudio.data.vo.v1.PersonVO;
 import br.com.erudio.rest_spring_java_erudio.exception.RequiredObjectIsNullException;

@@ -25,6 +25,7 @@ public class BookController {
     @Autowired
     private BookService service;
 
+    @CrossOrigin(origins = "http://localhost:8080")
     @GetMapping(value = "/{id}", produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
     @Operation(summary = "Finds a Book", description = "Finds a Book",
             tags = {"Books"},
@@ -63,6 +64,7 @@ public class BookController {
         return service.findAll();
     }
 
+    @CrossOrigin(origins = {"http://localhost:8080", "https://erudio.com.br"})
     @PostMapping(consumes = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML},
                 produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
     @Operation(summary = "Adds a new book",
