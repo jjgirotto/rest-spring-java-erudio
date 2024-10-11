@@ -1,8 +1,11 @@
 package br.com.erudio.rest_spring_java_erudio.integrationtests.vo;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import java.io.Serializable;
 import java.util.Objects;
 
+@XmlRootElement
 public class PersonVO implements Serializable {
 
     private Long id;
@@ -12,15 +15,6 @@ public class PersonVO implements Serializable {
     private String gender;
 
     public PersonVO(){
-
-    }
-
-    public PersonVO(Long id, String firstName, String lastName, String address, String gender) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.gender = gender;
     }
 
     public Long getId() {
