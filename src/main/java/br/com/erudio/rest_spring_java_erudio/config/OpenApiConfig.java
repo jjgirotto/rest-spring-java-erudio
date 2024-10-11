@@ -12,9 +12,9 @@ public class OpenApiConfig {
     OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("REST API's RESTful from 0 to AWS  with Java 21,  Spring Boot 3.2.0 and Docker")
+                        .title("REST API's RESTful from 0 to AWS with Java 21, Spring Boot 3.2.0 and Docker")
                         .version("v1")
-                        .description("Some description about your API")
+                        .description("API for Person and Books with JWT Authentication")
                         .termsOfService("https://pub.erudio.com.br/meus-cursos")
                         .license(
                                 new License()

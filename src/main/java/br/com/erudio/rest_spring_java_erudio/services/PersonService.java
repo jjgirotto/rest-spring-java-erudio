@@ -88,9 +88,9 @@ public class PersonService {
         personRepository.delete(entity);
     }
 
-    public PersonVOV2 createV2(PersonVOV2 person) {
-        logger.info("Creating a person with V2");
-        var entity = mapper.convertVoToEntity(person);
-        return mapper.convertEntityToVo(personRepository.save(entity));
-    }
+//    public PersonVOV2 createV2(PersonVOV2 person) {
+//        logger.info("Creating a person with V2");
+//        var entity = mapper.convertVoToEntity(person);
+//        return mapper.convertEntityToVo(personRepository.save(entity));
+//    }
 }
