@@ -26,7 +26,7 @@ public class AuthController {
     @SuppressWarnings("rawtypes")
     @Operation(summary = "Authenticates a user and returns a token")
     @PostMapping(value = "/signin")
-    public ResponseEntity signin(@RequestBody AccountCredentialsVO data) {
+    public ResponseEntity signIn(@RequestBody AccountCredentialsVO data) {
         if (checkIfParamsIsNotNull(data))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid client request!");
         var token = authServices.signIn(data);
