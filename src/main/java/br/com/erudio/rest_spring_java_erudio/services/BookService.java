@@ -3,8 +3,6 @@ package br.com.erudio.rest_spring_java_erudio.services;
 import br.com.erudio.rest_spring_java_erudio.controller.BookController;
 import br.com.erudio.rest_spring_java_erudio.controller.PersonController;
 import br.com.erudio.rest_spring_java_erudio.data.vo.v1.BookVO;
-import br.com.erudio.rest_spring_java_erudio.data.vo.v1.PersonVO;
-import br.com.erudio.rest_spring_java_erudio.data.vo.v2.PersonVOV2;
 import br.com.erudio.rest_spring_java_erudio.exception.RequiredObjectIsNullException;
 import br.com.erudio.rest_spring_java_erudio.exception.ResourceNotFoundException;
 import br.com.erudio.rest_spring_java_erudio.mapper.DozerMapper;
