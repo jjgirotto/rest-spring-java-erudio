@@ -24,6 +24,7 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
+    @CrossOrigin(origins = "http://localhost:8080")
     @GetMapping(value = "/{id}", produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
     @Operation(summary = "Finds a Person", description = "Finds a Person",
             tags = {"People"},
@@ -62,6 +63,7 @@ public class PersonController {
         return personService.findAll();
     }
 
+    @CrossOrigin(origins = {"http://localhost:8080", "https://erudio.com.br"})
     @PostMapping(consumes = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML},
                 produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
     @Operation(summary = "Adds a new Person",
@@ -79,11 +81,6 @@ public class PersonController {
     public PersonVO create(@RequestBody PersonVO person) throws Exception {
         return personService.create(person);
     }
-
-//    @PostMapping(value = "/v2", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public PersonVOV2 createV2(@RequestBody PersonVOV2 person) {
-//        return personService.createV2(person);
-//    }
 
     @PutMapping(consumes = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML},
                 produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
@@ -104,6 +101,24 @@ public class PersonController {
         return personService.create(person);
     }
 
+    @PatchMapping(value = "/{id}", produces = {APPLICATION_JSON, APPLICATION_XML, APPLICATION_YML})
+    @Operation(summary = "Disable a specific person by id", description = "Disable a specific person by id",
+            tags = {"People"},
+            responses = {
+                    @ApiResponse(description = "Success", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = PersonVO.class))
+                    ),
+                    @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                    @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                    @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Internal Error", responseCode = "500", content = @Content),
+            }
+    )
+    public PersonVO disablePerson(@PathVariable(value = "id") Long id) throws Exception {
+        return personService.disablePerson(id);
+    }
+
     @DeleteMapping(value = "/{id}")
     @Operation(summary = "Deletes a Person",
             description = "Deletes a Person by passing in a JSON, XML or YML representation of the person!",
@@ -121,5 +136,9 @@ public class PersonController {
         return ResponseEntity.noContent().build();
     }
 
+//    @PostMapping(value = "/v2", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public PersonVOV2 createV2(@RequestBody PersonVOV2 person) {
+//        return personService.createV2(person);
+//    }
 
 }
