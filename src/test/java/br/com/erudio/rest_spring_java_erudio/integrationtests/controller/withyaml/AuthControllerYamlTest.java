@@ -4,11 +4,16 @@ import br.com.erudio.rest_spring_java_erudio.configs.TestConfigs;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.testcontainers.AbstractIntegrationTest;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.AccountCredentialsVO;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.TokenVO;
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.images.ImagePullPolicy;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertNotNull;
@@ -18,6 +23,12 @@ import static org.junit.Assert.assertNotNull;
 public class AuthControllerYamlTest extends AbstractIntegrationTest {
 
     private static TokenVO tokenVO;
+    private static YMLMapper mapper;
+
+    @BeforeAll
+    public static void setUp() {
+        mapper = new YMLMapper();
+    }
 
     @Test
     @Order(1)
@@ -27,17 +38,22 @@ public class AuthControllerYamlTest extends AbstractIntegrationTest {
                 new AccountCredentialsVO("leandro", "admin123");
 
         tokenVO = given()
+                .config(RestAssuredConfig.config()
+                        .encoderConfig(EncoderConfig
+                                .encoderConfig()
+                                .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .accept(TestConfigs.CONTENT_TYPE_YML)
                 .basePath("/auth/signin")
                 .port(TestConfigs.SERVER_PORT)
                 .contentType(TestConfigs.CONTENT_TYPE_YML)
-                .body(user)
+                .body(user, mapper)
                 .when()
                 .post()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .as(TokenVO.class);
+                .as(TokenVO.class, mapper);
 
         assertNotNull(tokenVO.getAccessToken());
         assertNotNull(tokenVO.getRefreshToken());
@@ -48,6 +64,11 @@ public class AuthControllerYamlTest extends AbstractIntegrationTest {
     public void testRefresh(){
 
         var newTokenVO = given()
+                .config(RestAssuredConfig.config()
+                    .encoderConfig(EncoderConfig
+                            .encoderConfig()
+                            .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .accept(TestConfigs.CONTENT_TYPE_YML)
                 .basePath("/auth/refresh")
                 .port(TestConfigs.SERVER_PORT)
                 .contentType(TestConfigs.CONTENT_TYPE_YML)
@@ -59,7 +80,7 @@ public class AuthControllerYamlTest extends AbstractIntegrationTest {
                 .statusCode(200)
                 .extract()
                 .body()
-                .as(TokenVO.class);
+                .as(TokenVO.class, mapper);
 
         assertNotNull(newTokenVO.getAccessToken());
         assertNotNull(newTokenVO.getRefreshToken());

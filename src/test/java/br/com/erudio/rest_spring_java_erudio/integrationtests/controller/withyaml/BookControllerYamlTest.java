@@ -1,10 +1,11 @@
-package br.com.erudio.rest_spring_java_erudio.integrationtests.controller.withjson;
+package br.com.erudio.rest_spring_java_erudio.integrationtests.controller.withyaml;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -16,36 +17,35 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.erudio.rest_spring_java_erudio.configs.TestConfigs;
-import br.com.erudio.rest_spring_java_erudio.data.vo.v1.security.AccountCredentialsVO;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.testcontainers.AbstractIntegrationTest;
+import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.AccountCredentialsVO;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.BookVO;
 import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.TokenVO;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class BookControllerJsonTest extends AbstractIntegrationTest {
+public class BookControllerYamlTest extends AbstractIntegrationTest {
 
     private static RequestSpecification specification;
-    private static ObjectMapper objectMapper;
+
+    private static YMLMapper objectMapper;
 
     private static BookVO book;
 
     @BeforeAll
     public static void setup() {
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
+        objectMapper = new YMLMapper();
         book = new BookVO();
     }
 
@@ -58,17 +58,23 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
 
         var token =
                 given()
+                        .config(
+                                RestAssuredConfig
+                                        .config()
+                                        .encoderConfig(EncoderConfig.encoderConfig()
+                                                .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
                         .basePath("/auth/signin")
                         .port(TestConfigs.SERVER_PORT)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                        .body(user)
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
+                        .accept(TestConfigs.CONTENT_TYPE_YML)
+                        .body(user, objectMapper)
                         .when()
                         .post()
                         .then()
                         .statusCode(200)
                         .extract()
                         .body()
-                        .as(TokenVO.class)
+                        .as(TokenVO.class, objectMapper)
                         .getAccessToken();
 
         specification =
@@ -87,18 +93,23 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
 
         mockBook();
 
-        var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                .body(book)
+        book = given()
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
+                .body(book, objectMapper)
                 .when()
                 .post()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .asString();
-
-        book = objectMapper.readValue(content, BookVO.class);
+                .as(BookVO.class, objectMapper);
 
         assertNotNull(book.getId());
         assertNotNull(book.getTitle());
@@ -116,18 +127,23 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
 
         book.setTitle("Docker Deep Dive - Updated");
 
-        var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                .body(book)
+        BookVO bookUpdated = given()
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
+                .body(book, objectMapper)
                 .when()
                 .put()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .asString();
-
-        BookVO bookUpdated = objectMapper.readValue(content, BookVO.class);
+                .as(BookVO.class, objectMapper);
 
         assertNotNull(bookUpdated.getId());
         assertNotNull(bookUpdated.getTitle());
@@ -142,8 +158,15 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
     @Test
     @Order(4)
     public void testFindById() throws JsonMappingException, JsonProcessingException {
-        var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+        var foundBook = given()
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
                 .pathParam("id", book.getId())
                 .when()
                 .get("{id}")
@@ -151,9 +174,7 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
                 .statusCode(200)
                 .extract()
                 .body()
-                .asString();
-
-        BookVO foundBook = objectMapper.readValue(content, BookVO.class);
+                .as(BookVO.class, objectMapper);
 
         assertNotNull(foundBook.getId());
         assertNotNull(foundBook.getTitle());
@@ -168,8 +189,15 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
     @Test
     @Order(5)
     public void testDelete() {
-        given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+        given()
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
                 .pathParam("id", book.getId())
                 .when()
                 .delete("{id}")
@@ -180,21 +208,27 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
     @Test
     @Order(6)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
-
-        var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                .queryParams("page", 0 , "limit", 5, "direction", "asc")
+        var response = given()
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(TestConfigs.CONTENT_TYPE_YML, ContentType.TEXT)))
+                .spec(specification)
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
                 .when()
                 .get()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .asString();
+                .as(BookVO[].class, objectMapper);
 
-        List<BookVO> books = objectMapper.readValue(content, new TypeReference<List<BookVO>>() {});
 
-        BookVO foundBookOne = books.get(0);
+        List<BookVO> content = Arrays.asList(response);
+
+        BookVO foundBookOne = content.get(0);
 
         assertNotNull(foundBookOne.getId());
         assertNotNull(foundBookOne.getTitle());
@@ -205,7 +239,7 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
         assertEquals("Michael C. Feathers", foundBookOne.getAuthor());
         assertEquals(49.00, foundBookOne.getPrice());
 
-        BookVO foundBookFive = books.get(4);
+        BookVO foundBookFive = content.get(4);
 
         assertNotNull(foundBookFive.getId());
         assertNotNull(foundBookFive.getTitle());
@@ -220,7 +254,7 @@ public class BookControllerJsonTest extends AbstractIntegrationTest {
     private void mockBook() {
         book.setTitle("Docker Deep Dive");
         book.setAuthor("Nigel Poulton");
-        book.setPrice(Double.valueOf(55.99));
+        book.setPrice(55.99);
         book.setLaunchDate(new Date());
     }
 }
