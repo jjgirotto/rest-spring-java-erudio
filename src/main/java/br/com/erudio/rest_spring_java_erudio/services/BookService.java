@@ -9,9 +9,12 @@ import br.com.erudio.rest_spring_java_erudio.mapper.DozerMapper;
 import br.com.erudio.rest_spring_java_erudio.model.Book;
 import br.com.erudio.rest_spring_java_erudio.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.logging.Logger;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -25,6 +28,10 @@ public class BookService {
     @Autowired
     private BookRepository repository;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    PagedResourcesAssembler<BookVO> assembler;
+
     public BookVO findById(Long id) throws Exception{
         logger.info("Finding a book!");
 
@@ -35,19 +42,20 @@ public class BookService {
         return vo;
     }
 
-    public List<BookVO> findAll () {
+    public PagedModel<EntityModel<BookVO>> findAll (Pageable pageable) {
         logger.info("Finding all books");
-        var books = DozerMapper.parseListObjects(repository.findAll(), BookVO.class);
-        books
-                .stream()
-                .forEach(p -> {
-                    try {
-                        p.add(linkTo(methodOn(BookController.class).findById(p.getKey())).withSelfRel());
-                    } catch (Exception e) {
-                        throw new ResourceNotFoundException("No records found");
-                    }
-                });
-        return books;
+        var bookPage = repository.findAll(pageable);
+        var booksVos = bookPage.map(p -> DozerMapper.parseObject(p, BookVO.class));
+        booksVos.map(p -> {
+            try {
+                return p.add(linkTo(methodOn(BookController.class).findById(p.getKey())).withSelfRel());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Link findAllLink = linkTo(methodOn(BookController.class).findAll(
+                pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+        return assembler.toModel(booksVos, findAllLink);
     }
 
     public BookVO create(BookVO book) throws Exception {

@@ -2,20 +2,23 @@ package br.com.erudio.rest_spring_java_erudio.services;
 
 import br.com.erudio.rest_spring_java_erudio.controller.PersonController;
 import br.com.erudio.rest_spring_java_erudio.data.vo.v1.PersonVO;
-import br.com.erudio.rest_spring_java_erudio.data.vo.v2.PersonVOV2;
 import br.com.erudio.rest_spring_java_erudio.exception.RequiredObjectIsNullException;
 import br.com.erudio.rest_spring_java_erudio.exception.ResourceNotFoundException;
 import br.com.erudio.rest_spring_java_erudio.mapper.DozerMapper;
-import br.com.erudio.rest_spring_java_erudio.mapper.custom.PersonMapper;
 import br.com.erudio.rest_spring_java_erudio.model.Person;
 import br.com.erudio.rest_spring_java_erudio.repository.PersonRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 @Service
@@ -26,12 +29,12 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private PersonMapper mapper;
+    PagedResourcesAssembler<PersonVO> assembler;
 
     public PersonVO findById(Long id) throws Exception{
         logger.info("Finding one person!");
-
         var entity = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
         var vo = DozerMapper.parseObject(entity, PersonVO.class);
@@ -39,19 +42,22 @@ public class PersonService {
         return vo;
     }
 
-    public List<PersonVO> findAll () {
+    public PagedModel<EntityModel<PersonVO>> findAll (Pageable pageable) {
         logger.info("Finding all people");
-        var persons = DozerMapper.parseListObjects(personRepository.findAll(), PersonVO.class);
-        persons
-                .stream()
-                .forEach(p -> {
-                    try {
-                        p.add(linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel());
-                    } catch (Exception e) {
-                        throw new ResourceNotFoundException("No records found");
-                    }
-                });
-        return persons;
+        var personPage = personRepository.findAll(pageable);
+        var personVosPage = getPersonVOS(personPage);
+        Link link = linkTo(methodOn(PersonController.class).findAll(
+                pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+        return assembler.toModel(personVosPage, link);
+    }
+
+    public PagedModel<EntityModel<PersonVO>> findPeopleByName (String firstName, Pageable pageable) {
+        logger.info("Finding all people by first name");
+        var personPage = personRepository.findPeopleByName(firstName, pageable);
+        var personVos = getPersonVOS(personPage);
+        Link link = linkTo(methodOn(PersonController.class).findAll(
+                pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+        return assembler.toModel(personVos, link);
     }
 
     public PersonVO create(PersonVO person) throws Exception {
@@ -105,4 +111,19 @@ public class PersonService {
 //        var entity = mapper.convertVoToEntity(person);
 //        return mapper.convertEntityToVo(personRepository.save(entity));
 //    }
+
+    private static Page<PersonVO> getPersonVOS(Page<Person> personPage) {
+        var personVos = personPage.map(p -> DozerMapper.parseObject(p, PersonVO.class));
+        personVos.map(p -> {
+            try {
+                return p.add(
+                        linkTo(methodOn(PersonController.class)
+                                .findById(p.getKey())).withSelfRel());
+            } catch (Exception e) {
+                throw new ResourceNotFoundException("No records found");
+            }
+        });
+        return personVos;
+    }
+
 }

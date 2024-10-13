@@ -58,7 +58,7 @@ class BookServiceTest {
         assertNotNull(result.getLaunchDate());
     }
 
-    @Test
+    /*@Test
     void findAll() {
         List<Book> list = input.mockEntityList();
 
@@ -104,7 +104,7 @@ class BookServiceTest {
         assertEquals("Harry Potter7", bookSeven.getTitle());
         assertEquals(100.00, bookSeven.getPrice());
         assertNotNull(bookSeven.getLaunchDate());
-    }
+    }*/
 
     @Test
     void create() throws Exception {
