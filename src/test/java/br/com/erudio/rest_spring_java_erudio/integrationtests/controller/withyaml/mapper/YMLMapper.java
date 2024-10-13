@@ -1,4 +1,4 @@
-package br.com.erudio.rest_spring_java_erudio.integrationtests.controller.withyaml;
+package br.com.erudio.rest_spring_java_erudio.integrationtests.controller.withyaml.mapper;
 
 import java.util.logging.Logger;
 
