@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import br.com.erudio.rest_spring_java_erudio.integrationtests.controller.withyaml.mapper.YMLMapper;
+import br.com.erudio.rest_spring_java_erudio.integrationtests.vo.pagedmodel.PagedModelBook;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -209,7 +210,7 @@ public class BookControllerYamlTest extends AbstractIntegrationTest {
     @Test
     @Order(6)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
-        var response = given()
+        var wrapper = given()
                 .config(
                         RestAssuredConfig
                                 .config()
@@ -218,38 +219,40 @@ public class BookControllerYamlTest extends AbstractIntegrationTest {
                 .spec(specification)
                 .contentType(TestConfigs.CONTENT_TYPE_YML)
                 .accept(TestConfigs.CONTENT_TYPE_YML)
+                .queryParams("page", 0 , "size", 3, "direction", "asc")
                 .when()
                 .get()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .as(BookVO[].class, objectMapper);
+                .as(PagedModelBook.class, objectMapper);
 
+        var books = wrapper.getContent();
 
-        List<BookVO> content = Arrays.asList(response);
-
-        BookVO foundBookOne = content.get(0);
+        BookVO foundBookOne = books.get(0);
 
         assertNotNull(foundBookOne.getId());
         assertNotNull(foundBookOne.getTitle());
         assertNotNull(foundBookOne.getAuthor());
         assertNotNull(foundBookOne.getPrice());
+
         assertTrue(foundBookOne.getId() > 0);
-        assertEquals("Working effectively with legacy code", foundBookOne.getTitle());
-        assertEquals("Michael C. Feathers", foundBookOne.getAuthor());
-        assertEquals(49.00, foundBookOne.getPrice());
+        assertEquals("Big Data: como extrair volume, variedade, velocidade e valor da avalanche de informação cotidiana", foundBookOne.getTitle());
+        assertEquals("Viktor Mayer-Schonberger e Kenneth Kukier", foundBookOne.getAuthor());
+        assertEquals(54.0, foundBookOne.getPrice());
 
-        BookVO foundBookFive = content.get(4);
+        BookVO foundBookThree = books.get(2);
 
-        assertNotNull(foundBookFive.getId());
-        assertNotNull(foundBookFive.getTitle());
-        assertNotNull(foundBookFive.getAuthor());
-        assertNotNull(foundBookFive.getPrice());
-        assertTrue(foundBookFive.getId() > 0);
-        assertEquals("Code complete", foundBookFive.getTitle());
-        assertEquals("Steve McConnell", foundBookFive.getAuthor());
-        assertEquals(58.0, foundBookFive.getPrice());
+        assertNotNull(foundBookThree.getId());
+        assertNotNull(foundBookThree.getTitle());
+        assertNotNull(foundBookThree.getAuthor());
+        assertNotNull(foundBookThree.getPrice());
+
+        assertTrue(foundBookThree.getId() > 0);
+        assertEquals("Code complete", foundBookThree.getTitle());
+        assertEquals("Steve McConnell", foundBookThree.getAuthor());
+        assertEquals(58.0, foundBookThree.getPrice());
     }
 
     private void mockBook() {
