@@ -1,5 +1,4 @@
 package br.com.erudio.rest_spring_java_erudio.integrationtests.testcontainers;
-
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -13,6 +12,7 @@ import org.testcontainers.lifecycle.Startables;
 
 @ContextConfiguration(initializers = AbstractIntegrationTest.Initializer.class)
 public class AbstractIntegrationTest {
+
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.29");
