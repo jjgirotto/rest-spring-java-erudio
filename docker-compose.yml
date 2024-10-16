@@ -19,10 +19,10 @@ services:
     networks:
       - erudio-network
   rest-with-spring-boot-erudio:
-    image: jjgirotto/rest-with-spring-boot-erudio
+    image: jjgirotto/rest-spring-java-erudio
     restart: always
-    build: ./rest-with-spring-boot-and-java-erudio
-    working_dir: /rest-with-spring-boot-and-java-erudio
+    build: ./rest-spring-java-erudio
+    working_dir: /rest-spring-java-erudio
     environment:
       TZ: America/Sao_Paulo
       SPRING.DATASOURCE.URL: jdbc:mysql://db:3308/rest_with_spring_boot_erudio?useTimezone=true&serverTimezone=UTC
